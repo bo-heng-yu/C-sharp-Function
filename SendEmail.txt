@@ -1,0 +1,34 @@
+        public void SendEmail(EmailModel emailModel,JObject sendMailSetting){
+            try{
+                var hostUrl         = sendMailSetting["mailServer"].ToString();         //smtp url
+                var port            = sendMailSetting["mailServerPort"].ToInt32();      //smtp port
+                var message         = new MailMessage();            //建立信件寄件者 收件者 標題 主旨
+                message.From        = new MailAddress(sendMailSetting["ac"].ToString(),sendMailSetting["emailTitle"].ToString()); //寄件人信箱與標題
+                message.To.Add(emailModel.userEmail);               //收件者信箱
+                message.Subject     = emailModel.subject;           //主旨
+                message.Body        = emailModel.htmlText;          //內容
+                message.IsBodyHtml  = true;
+
+                AlternateView htmlView = 
+                    AlternateView.CreateAlternateViewFromString(emailModel.htmlText, null, "text/html");
+
+                LinkedResource imageResource = new LinkedResource(emailModel.filePath, "image/jpg");
+                string[] fileNameSpilt = emailModel.filePath.Split(@"\");
+                string fileName = fileNameSpilt[fileNameSpilt.Length - 1].Split(@".")[0];
+                imageResource.ContentId         = fileName;
+                imageResource.TransferEncoding  = TransferEncoding.Base64;
+                htmlView.LinkedResources.Add(imageResource);
+                message.AlternateViews.Add(htmlView);
+
+                using (var client = new SmtpClient (hostUrl,port)) {
+                    client.Credentials = new NetworkCredential(sendMailSetting["ac"].ToString(), AesDecrypt(sendMailSetting["pwd"].ToString())); //寄信用的信箱帳號密碼
+                    client.EnableSsl = true;
+                    client.Send(message);
+                    client.Dispose();
+                } 
+            }
+            catch (Exception e){
+                Console.WriteLine($"error:{e.ToString()}");
+                throw e;
+            }
+        }
