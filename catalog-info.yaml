@@ -3,9 +3,6 @@ kind: Component
 metadata:
   name: liontravel-backstage
   description: An example of a Backstage application.
-  annotations:
-    azdevops.liontravel.com/LionTech: TripGDS/Web.LionTravel.B2B.TripGDS.Middleware
-    backstage.io/techdocs-ref: dir:.
 spec:
   type: service
   owner: heng
